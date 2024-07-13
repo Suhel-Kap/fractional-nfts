@@ -37,7 +37,7 @@ contract FractionalNFT is ERC721, Ownable {
     ) ERC721("FractionalNFT", "FRACT") Ownable(msg.sender) {
         usdc = _usdc;
         licenseNFT = _licenseNFT;
-        platformFee = _platformFee;
+        i_platformFee = _platformFee;
         price = _price;
         usdc.approve(address(this), type(uint256).max);
     }
@@ -51,7 +51,7 @@ contract FractionalNFT is ERC721, Ownable {
      * @param to - Address to mint the NFT to
      * @param quantity - Number of NFTs to mint
      */
-    function mint(address to, uint256 quantity) {
+    function mint(address to, uint256 quantity) external {
         require(to != address(0), "Invalid address");
         require(quantity > 0, "Quantity must be greater than 0");
         require(
@@ -66,7 +66,7 @@ contract FractionalNFT is ERC721, Ownable {
         );
         require(success, "Transfer failed");
 
-        uint256 licenseNftId = licenseNft.getNextTokenId();
+        uint256 licenseNftId = licenseNFT.getNextTokenId();
         for (uint256 i = 0; i < quantity; i++) {
             uint256 tokenId = _nextTokenId++;
             uint256 fractionCountForLicense = mainLicenseFractionCount[
@@ -96,13 +96,31 @@ contract FractionalNFT is ERC721, Ownable {
      * @param tokenId - ID of the NFT to burn
      */
     function burn(uint256 tokenId) external onlyOwner {
-        require(_exists(tokenId), "Token does not exist");
+        require(exists(tokenId), "Token does not exist");
 
         uint256 licenseNftId = fractionNftToLicenseNft[tokenId];
         mainLicenseFractionCount[licenseNftId]--;
 
         _burn(tokenId);
         emit FractionBurned(msg.sender, tokenId);
+    }
+
+    // Only owner functions
+
+    function setPrice(uint256 _price) external onlyOwner {
+        price = _price;
+    }
+
+    function setFractions(uint256 _fractions) external onlyOwner {
+        fractions = _fractions;
+    }
+
+    function withdrawPlatformFee(uint256 amount) external onlyOwner {
+        require(
+            amount <= usdc.balanceOf(address(this)),
+            "Insufficient balance"
+        );
+        usdc.transfer(owner(), amount);
     }
 
     // View functions
@@ -149,5 +167,9 @@ contract FractionalNFT is ERC721, Ownable {
 
     function getBalance() external view returns (uint256) {
         return usdc.balanceOf(address(this));
+    }
+
+    function exists(uint256 tokenId) public view returns (bool) {
+        return tokenId < _nextTokenId;
     }
 }
