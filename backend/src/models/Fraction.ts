@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IFraction extends Document {
+  _id: mongoose.Types.ObjectId;
   fractionalNftAddress: string;
   fractionalNftTokenId: string;
   chainId: number;

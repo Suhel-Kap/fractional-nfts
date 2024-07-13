@@ -13,7 +13,7 @@ const BatchSchema: Schema = new Schema({
   fractions: [{ type: Schema.Types.ObjectId, ref: "Fraction", required: true }],
   licenseNftAddress: { type: String },
   licenseNftTokenId: { type: String },
-  chain: { type: Number, required: true },
+  chainId: { type: Number, required: true },
   isComplete: { type: Boolean, default: false },
 });
 
