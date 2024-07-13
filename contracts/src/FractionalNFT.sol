@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {MyUSDC} from "./MyUSDC.sol";
 import {LicenseNFT} from "./LicenseNFT.sol";
-
-// Used NFT in LicenseNFT
 
 contract FractionalNFT is ERC721, Ownable {
     uint256 private _nextTokenId;
@@ -15,6 +13,7 @@ contract FractionalNFT is ERC721, Ownable {
     LicenseNFT public licenseNFT;
     uint256 public immutable i_platformFee;
     uint256 public price;
+    uint256 public immutable i_totalSupply;
 
     // @dev - This mapping is used to keep track of how many fraction NFTs have been assigned to a license NFT
     mapping(uint256 => uint256) public mainLicenseFractionCount;
@@ -33,13 +32,15 @@ contract FractionalNFT is ERC721, Ownable {
         MyUSDC _usdc,
         LicenseNFT _licenseNFT,
         uint256 _platformFee,
-        uint256 _price
+        uint256 _price,
+        uint256 _totalSupply
     ) ERC721("FractionalNFT", "FRACT") Ownable(msg.sender) {
+        i_totalSupply = _totalSupply;
         usdc = _usdc;
         licenseNFT = _licenseNFT;
         i_platformFee = _platformFee;
         price = _price;
-        usdc.approve(address(this), type(uint256).max);
+        usdc.approve(address(_licenseNFT), type(uint256).max);
     }
 
     /**
@@ -52,19 +53,22 @@ contract FractionalNFT is ERC721, Ownable {
      * @param quantity - Number of NFTs to mint
      */
     function mint(address to, uint256 quantity) external {
-        require(to != address(0), "Invalid address");
+        require(to != address(0), "Zero address not allowed");
         require(quantity > 0, "Quantity must be greater than 0");
         require(
             usdc.balanceOf(msg.sender) >= (price + i_platformFee) * quantity,
             "Insufficient balance"
         );
+        require(
+            _nextTokenId + quantity <= i_totalSupply,
+            "Total supply reached"
+        );
 
-        bool success = usdc.transferFrom(
+        usdc.transferFrom(
             msg.sender,
             address(this),
             (price + i_platformFee) * quantity
         );
-        require(success, "Transfer failed");
 
         uint256 licenseNftId = licenseNFT.getNextTokenId();
         for (uint256 i = 0; i < quantity; i++) {
@@ -126,7 +130,7 @@ contract FractionalNFT is ERC721, Ownable {
     // View functions
 
     function getNextTokenId() external view returns (uint256) {
-        return _nextTokenId;
+        return _nextTokenId + 1;
     }
 
     function getFractionCountForLicense(
@@ -171,5 +175,9 @@ contract FractionalNFT is ERC721, Ownable {
 
     function exists(uint256 tokenId) public view returns (bool) {
         return tokenId < _nextTokenId;
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return i_totalSupply;
     }
 }

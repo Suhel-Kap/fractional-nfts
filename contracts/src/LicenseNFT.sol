@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,14 +12,19 @@ contract LicenseNFT is ERC721, Ownable {
     MyUSDC public usdc;
     uint256 public fractions;
     uint256 public price;
+    uint256 public immutable i_totalSupply;
 
     // @dev - This mapping is used to check if a fraction NFT has been used to mint a license NFT
     mapping(uint256 => bool) public usedFractionNFTs;
 
     constructor(
+        MyUSDC _usdc,
         uint256 _fractions,
-        uint256 _price
+        uint256 _price,
+        uint256 _totalSupply
     ) ERC721("LicenseNFT", "LIC") Ownable(msg.sender) {
+        i_totalSupply = _totalSupply;
+        usdc = _usdc;
         fractions = _fractions;
         price = _price;
     }
@@ -34,12 +39,13 @@ contract LicenseNFT is ERC721, Ownable {
      * @param fractionalTokenIds - Array of 10 fraction NFT IDs
      */
     function mint(
-        uint256[] memory fractionalTokenIds
+        uint256[10] memory fractionalTokenIds
     ) external onlyOwner returns (uint256) {
         require(
             fractionalTokenIds.length == fractions,
             "Must provide 10 fractions"
         );
+        require(_nextTokenId < i_totalSupply, "Total supply reached");
 
         for (uint256 i = 0; i < fractions; i++) {
             require(
@@ -52,12 +58,7 @@ contract LicenseNFT is ERC721, Ownable {
             );
         }
 
-        bool success = usdc.transferFrom(
-            address(fractionalNft),
-            address(this),
-            price
-        );
-        require(success, "Transfer failed");
+        usdc.transferFrom(address(fractionalNft), address(this), price);
 
         for (uint256 i = 0; i < fractions; i++) {
             usedFractionNFTs[fractionalTokenIds[i]] = true;
@@ -89,7 +90,7 @@ contract LicenseNFT is ERC721, Ownable {
     // View functions
 
     function getNextTokenId() external view returns (uint256) {
-        return _nextTokenId;
+        return _nextTokenId + 1;
     }
 
     function getUsedFractionNFT(uint256 tokenId) external view returns (bool) {
@@ -114,5 +115,9 @@ contract LicenseNFT is ERC721, Ownable {
 
     function getFractionalNft() external view returns (FractionalNFT) {
         return fractionalNft;
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return i_totalSupply;
     }
 }
