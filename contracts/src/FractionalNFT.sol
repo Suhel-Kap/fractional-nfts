@@ -72,7 +72,8 @@ contract FractionalNFT is ERC721, Ownable {
 
         uint256 licenseNftId = licenseNFT.getNextTokenId();
         for (uint256 i = 0; i < quantity; i++) {
-            uint256 tokenId = _nextTokenId++;
+            _nextTokenId++;
+            uint256 tokenId = _nextTokenId;
             uint256 fractionCountForLicense = mainLicenseFractionCount[
                 licenseNftId
             ];
@@ -174,7 +175,7 @@ contract FractionalNFT is ERC721, Ownable {
     }
 
     function exists(uint256 tokenId) public view returns (bool) {
-        return tokenId < _nextTokenId;
+        return tokenId <= _nextTokenId;
     }
 
     function totalSupply() external view returns (uint256) {

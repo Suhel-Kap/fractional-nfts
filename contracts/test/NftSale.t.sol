@@ -128,7 +128,6 @@ contract NftSaleTest is Test {
 
         vm.startPrank(owner);
         uint256[10] memory fractions = [
-            uint256(0),
             uint256(1),
             uint256(2),
             uint256(3),
@@ -137,16 +136,16 @@ contract NftSaleTest is Test {
             uint256(6),
             uint256(7),
             uint256(8),
-            uint256(9)
+            uint256(9),
+            uint256(10)
         ];
         uint256 licenseTokenId = licenseNft.mint(fractions);
         assertEq(licenseNft.balanceOf(owner), 1);
-        assertEq(licenseTokenId, 0);
+        assertEq(licenseTokenId, 1);
     }
 
     function test_buyLicenseWithUsedFractionsShouldRevert() public {
         uint256[10] memory fractions = [
-            uint256(0),
             uint256(1),
             uint256(2),
             uint256(3),
@@ -155,7 +154,8 @@ contract NftSaleTest is Test {
             uint256(6),
             uint256(7),
             uint256(8),
-            uint256(9)
+            uint256(9),
+            uint256(10)
         ];
         test_buyOneLicenseNft();
 
@@ -165,7 +165,6 @@ contract NftSaleTest is Test {
 
     function test_buyLicenseWithInvalidFractionsShouldRevert() public {
         uint256[10] memory fractions = [
-            uint256(10),
             uint256(11),
             uint256(12),
             uint256(13),
@@ -174,7 +173,8 @@ contract NftSaleTest is Test {
             uint256(16),
             uint256(17),
             uint256(18),
-            uint256(19)
+            uint256(19),
+            uint256(20)
         ];
         test_buyOneLicenseNft();
         vm.expectRevert("Fraction does not exist");
@@ -193,7 +193,6 @@ contract NftSaleTest is Test {
 
         vm.startPrank(owner);
         uint256[10] memory fractions = [
-            uint256(0),
             uint256(1),
             uint256(2),
             uint256(3),
@@ -202,7 +201,8 @@ contract NftSaleTest is Test {
             uint256(6),
             uint256(7),
             uint256(8),
-            uint256(9)
+            uint256(9),
+            uint256(10)
         ];
         fractionalNft.withdrawPlatformFee(
             usdc.balanceOf(address(fractionalNft))
@@ -235,11 +235,11 @@ contract NftSaleTest is Test {
                 buyer
             )
         );
-        fractionalNft.burn(0);
+        fractionalNft.burn(1);
         assertEq(fractionalNft.balanceOf(buyer), 1);
 
         vm.startPrank(owner);
-        fractionalNft.burn(0);
+        fractionalNft.burn(1);
         assertEq(fractionalNft.balanceOf(buyer), 0);
     }
 }

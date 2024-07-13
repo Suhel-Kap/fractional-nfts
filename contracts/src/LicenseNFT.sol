@@ -64,7 +64,8 @@ contract LicenseNFT is ERC721, Ownable {
             usedFractionNFTs[fractionalTokenIds[i]] = true;
         }
 
-        uint256 tokenId = _nextTokenId++;
+        _nextTokenId++;
+        uint256 tokenId = _nextTokenId;
         _mint(owner(), tokenId);
         return tokenId;
     }
