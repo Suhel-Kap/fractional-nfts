@@ -23,6 +23,9 @@ export async function processFractionMintEvent(
     chainId: config.CHAIN_ID,
   });
 
+  // If there is an incomplete batch, add the fraction to it
+  // If the batch is now complete, mint the License NFT
+  // Otherwise, create a new batch
   if (incompleteBatch) {
     incompleteBatch.fractions.push(fraction._id);
     console.log(`Fraction added to batch ${incompleteBatch._id}`);
@@ -45,6 +48,10 @@ export async function processFractionMintEvent(
   }
 }
 
+// Mint the License NFT for a batch
+// This function is called when a batch is complete
+// This creates an array of fraction IDs that is required to mint the License NFT
+// This does not add anything to the database, the listener on the license contract will do that
 async function mintLicenseNFT(batch: IBatch) {
   try {
     const fractionIds = await Promise.all(

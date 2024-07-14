@@ -86,4 +86,17 @@ router.get("/fractions/count/:chainId", async (req, res) => {
   }
 });
 
+// Get a fraction by ID
+router.get("/fractions/:id", async (req, res) => {
+  try {
+    const fraction = await Fraction.findById(req.params.id);
+    if (!fraction) {
+      return res.status(404).json({ message: "Fraction not found" });
+    }
+    res.json(fraction);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

@@ -24,11 +24,13 @@ export function setupEventListeners() {
   fractionContract.on(
     "FractionNFTMinted",
     async (to: string, tokenId: ethers.BigNumber) => {
+      // Queue event for processing - this listener is only responsible for queuing events
       queueEvent({ to, tokenId });
       console.log(`Event queued: Fraction NFT minted ${tokenId.toString()}`);
     },
   );
 
+  // Find the latest batch that is not complete and assign the License NFT to it
   licenseContract.on("Transfer", async (from, to, tokenId) => {
     if (from === ethers.constants.AddressZero) {
       try {
