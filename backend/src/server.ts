@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { config } from "./config";
 import { setupEventListeners } from "./services/contractService";
+import dbRoutes from "./routes/db";
 
 dotenv.config();
 
@@ -19,6 +20,9 @@ mongoose
     setupEventListeners();
   })
   .catch((err) => console.error("Could not connect to MongoDB", err));
+
+// Setup routes
+app.use("/database", dbRoutes);
 
 // Start the server
 app.listen(config.PORT, () => {

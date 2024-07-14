@@ -28,7 +28,7 @@ export async function processFractionMintEvent(
     console.log(`Fraction added to batch ${incompleteBatch._id}`);
     console.log(`Batch size: ${incompleteBatch.fractions.length}`);
 
-    if (incompleteBatch.fractions.length >= 10) {
+    if (incompleteBatch.fractions.length === 10) {
       incompleteBatch.isComplete = true;
       await incompleteBatch.save();
       await mintLicenseNFT(incompleteBatch);
